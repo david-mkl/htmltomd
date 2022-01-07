@@ -139,7 +139,13 @@ Specify the output format with a `--output-format` flag. Supported values are
 You may also install the components of this tool to use in your own Go code for further customization.
 
 ```sh
-go install github.com/david-mk-lawrence/html-to-md/pkg/converter
+go get github.com/david-mk-lawrence/html-to-md
+```
+
+Then import the converter package
+
+```go
+import "github.com/david-mk-lawrence/html-to-md/pkg/converter"
 ```
 
 Two structs are needed to convert documents. A DocumentConverter and a struct that implements a SelectionConverter interface. A DocumentConverter is what handles the HTML document itself. A SelectionConverter is an interface that handles and converts specific elements in the document. This library provides a
