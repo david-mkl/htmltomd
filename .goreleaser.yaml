@@ -19,6 +19,12 @@ brews:
       owner: david-mk-lawrence
       name: html-to-md
 
+    name: htmltomd
+
+    url_template: "https://github.com/david-mk-lawrence/html-to-md/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+
+    homepage: "https://github.com/david-mk-lawrence/html-to-md"
+
     commit_author:
       name: david-mk-lawrence
       email: 32286773+david-mk-lawrence@users.noreply.github.com
