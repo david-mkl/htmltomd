@@ -18,6 +18,7 @@ brews:
   - tap:
       owner: david-mk-lawrence
       name: homebrew-html-to-md
+      branch: main
 
     name: htmltomd
 
@@ -34,8 +35,6 @@ brews:
     description: "Convert HTML files to markdown"
 
     licence: "MIT"
-
-    skip_upload: auto
 
 gomod:
   proxy: true
