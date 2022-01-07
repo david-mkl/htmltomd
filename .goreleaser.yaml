@@ -17,7 +17,7 @@ builds:
 brews:
   - tap:
       owner: david-mk-lawrence
-      name: htmltomd
+      name: html-to-md
 
     commit_author:
       name: david-mk-lawrence
