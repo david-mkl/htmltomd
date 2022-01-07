@@ -26,10 +26,6 @@ brews:
 
     homepage: "https://github.com/david-mk-lawrence/html-to-md"
 
-    commit_author:
-      name: david-mk-lawrence
-      email: 32286773+david-mk-lawrence@users.noreply.github.com
-
     folder: Formula
 
     description: "Convert HTML files to markdown"
