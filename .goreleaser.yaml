@@ -17,7 +17,7 @@ builds:
 brews:
   - tap:
       owner: david-mk-lawrence
-      name: html-to-md
+      name: homebrew-html-to-md
 
     name: htmltomd
 
