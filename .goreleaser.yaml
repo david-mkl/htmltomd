@@ -1,0 +1,65 @@
+project_name: htmltomd
+
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+builds:
+  main: ./cmd/htmltomd/main.go
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+
+brews:
+  - tap:
+      owner: david-mk-lawrence
+      name: htmltomd
+
+    commit_author:
+      name: david-mk-lawrence
+      email: 32286773+david-mk-lawrence@users.noreply.github.com
+
+    folder: Formula
+
+    description: "Convert HTML files to markdown"
+
+    licence: "MIT"
+
+    skip_upload: auto
+
+gomod:
+  proxy: true
+
+signs:
+  artifacts: all
+
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+  format_overrides:
+      - goos: windows
+        format: zip
+
+  files:
+    - LICENCE
+    - README.md
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
