@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/david-mk-lawrence/html-to-md/pkg/markdown"
+	"github.com/david-mk-lawrence/htmltomd/pkg/markdown"
 )
 
 type TestSelectionConverter struct {

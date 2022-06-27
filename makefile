@@ -5,7 +5,7 @@ LDFLAGS :=
 
 GIT_TAG = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 ifneq ($(GIT_TAG),)
-	LDFLAGS += -X github.com/david-mk-lawrence/html-to-md/internal/version.version=${GIT_TAG}
+	LDFLAGS += -X github.com/david-mk-lawrence/htmltomd/internal/version.version=${GIT_TAG}
 endif
 
 # Rebuild the binary if any source files change

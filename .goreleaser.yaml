@@ -9,12 +9,11 @@ builds:
       - windows
       - darwin
 brews:
-  - name: htmltomd
-    description: "Convert HTML files to markdown"
-    homepage: "https://github.com/david-mk-lawrence/html-to-md"
-    tap:
+  - tap:
       owner: david-mk-lawrence
-      name: homebrew-html-to-md
+      name: homebrew-htmltomd
+    description: "Convert HTML files to markdown"
+    homepage: "https://github.com/david-mk-lawrence/htmltomd"
 archives:
   - replacements:
       darwin: Darwin

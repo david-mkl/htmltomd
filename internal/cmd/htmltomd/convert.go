@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/david-mk-lawrence/html-to-md/pkg/converter"
+	"github.com/david-mk-lawrence/htmltomd/pkg/converter"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/spf13/cobra"

@@ -1,7 +1,7 @@
 package htmltomd
 
 import (
-	"github.com/david-mk-lawrence/html-to-md/internal/version"
+	"github.com/david-mk-lawrence/htmltomd/internal/version"
 	"github.com/spf13/cobra"
 )
 

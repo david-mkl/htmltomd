@@ -2,7 +2,7 @@
 package converter
 
 import (
-	"github.com/david-mk-lawrence/html-to-md/pkg/markdown"
+	"github.com/david-mk-lawrence/htmltomd/pkg/markdown"
 
 	"github.com/PuerkitoBio/goquery"
 )

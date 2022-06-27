@@ -3,7 +3,7 @@ package markdown
 import (
 	"testing"
 
-	"github.com/david-mk-lawrence/html-to-md/pkg/util"
+	"github.com/david-mk-lawrence/htmltomd/pkg/util"
 )
 
 type testContent struct {

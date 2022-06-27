@@ -1,4 +1,4 @@
-module github.com/david-mk-lawrence/html-to-md
+module github.com/david-mk-lawrence/htmltomd
 
 go 1.17
 
