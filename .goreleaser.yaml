@@ -1,5 +1,3 @@
-project_name: htmltomd
-
 before:
   hooks:
     - go mod tidy
@@ -15,30 +13,25 @@ builds:
       - darwin
 
 brews:
-  - tap:
-      owner: david-mk-lawrence
-      name: homebrew-html-to-md
-      branch: main
-
-    name: htmltomd
-
-    url_template: "https://github.com/david-mk-lawrence/html-to-md/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-
-    homepage: "https://github.com/david-mk-lawrence/html-to-md"
-
-    folder: Formula
-
+  - name: htmltomd
     description: "Convert HTML files to markdown"
 
-    licence: "MIT"
+    tap:
+      owner: david-mk-lawrence
+      name: homebrew-html-to-md
 
-gomod:
-  proxy: true
+    # folder: Formula
 
-signs:
-  artifacts: all
+    # commit_author:
+    #   name: david-mk-lawrence
+    #   email: 32286773+david-mk-lawrence@users.noreply.github.com
+
+    # url_template: "https://github.com/david-mk-lawrence/html-to-md/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # homepage: "https://github.com/david-mk-lawrence/html-to-md"
+    # licence: "MIT"
 
 archives:
+  wrap_in_directory: true
   - replacements:
       darwin: Darwin
       linux: Linux
