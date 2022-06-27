@@ -1,8 +1,6 @@
 before:
   hooks:
     - go mod tidy
-    - go mod download
-
 builds:
   - env:
       - CGO_ENABLED=0
@@ -10,33 +8,20 @@ builds:
       - linux
       - windows
       - darwin
-
 brews:
   - name: htmltomd
     description: "Convert HTML files to markdown"
     homepage: "https://github.com/david-mk-lawrence/html-to-md"
-
     tap:
       owner: david-mk-lawrence
       name: homebrew-html-to-md
-
 archives:
-  wrap_in_directory: true
   - replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       386: i386
       amd64: x86_64
-
-  format_overrides:
-      - goos: windows
-        format: zip
-
-  files:
-    - LICENCE
-    - README.md
-
 checksum:
   name_template: 'checksums.txt'
 snapshot:
