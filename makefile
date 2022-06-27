@@ -1,6 +1,6 @@
 BINDIR := $(CURDIR)/bin
 BINNAME ?= htmltomd
-MAIN := ./cmd/htmltomd
+MAIN := ./
 LDFLAGS :=
 
 GIT_TAG = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
