@@ -15,20 +15,11 @@ builds:
 brews:
   - name: htmltomd
     description: "Convert HTML files to markdown"
+    homepage: "https://github.com/david-mk-lawrence/html-to-md"
 
     tap:
       owner: david-mk-lawrence
       name: homebrew-html-to-md
-
-    # folder: Formula
-
-    # commit_author:
-    #   name: david-mk-lawrence
-    #   email: 32286773+david-mk-lawrence@users.noreply.github.com
-
-    # url_template: "https://github.com/david-mk-lawrence/html-to-md/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    # homepage: "https://github.com/david-mk-lawrence/html-to-md"
-    # licence: "MIT"
 
 archives:
   wrap_in_directory: true
