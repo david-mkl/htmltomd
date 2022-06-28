@@ -8,6 +8,8 @@ builds:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -X github.com/david-mk-lawrence/htmltomd/internal/version.version={{.Version}}
 brews:
   - tap:
       owner: david-mk-lawrence
