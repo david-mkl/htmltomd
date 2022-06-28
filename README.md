@@ -1,6 +1,21 @@
 # htmltomd
 
-CLI tool and library to Convert HTML to Markdown with support for Confluence, and Google Docs.
+CLI tool and library to Convert HTML to Markdown with support for inputs from Confluence and Google Docs, and outputs to markdown and Hugo.
+
+## Install
+
+`htmltomd` can be installed with homebrew
+
+```sh
+brew tap david-mk-lawrence/htmltomd
+brew install htmltomd
+```
+
+## Usage
+
+```sh
+htmltomd --help
+```
 
 ## Input Sources
 
@@ -80,31 +95,12 @@ to
 | Data 2,1 | Data 2,2 |
 ```
 
-## Install
-
-The binary can be built from source and requires go >= 1.17 to be installed on your system. (The `build` step assumes you have appropriate values for `GOOS` and `GOARCH` set for your system).
-
-Build the binary with
-
-```sh
-make install
-make build
-```
-
-This creates an executable called `html2md`.
-
-## Usage
-
-```sh
-./html2md -h
-```
-
 ### Convert Command
 
 Converts `.html` files to `.md` files.
 
 ```sh
-./html2md convert <file.html|directory>
+htmltomd convert <file.html|directory>
 ```
 
 The argument can be an HTML file or a directory containing HTML files.
@@ -122,7 +118,7 @@ The input source can be specified with a `--input-format` flag to handle specifi
 For example
 
 ```sh
-./html2md convert --input-format confluence path/to/confluence/files
+htmltomd convert --input-format confluence path/to/confluence/files
 ```
 
 Specify the output format with a `--output-format` flag. Supported values are
@@ -131,7 +127,7 @@ Specify the output format with a `--output-format` flag. Supported values are
 * `hugo` - Renders markdown elements as shortcodes for a Hugo website
 
 ```txt
-./html2md convert --output-format hugo path/to/files
+htmltomd convert --output-format hugo path/to/files
 ```
 
 ## Usage as a Library
@@ -228,3 +224,18 @@ Confluence only supports exporting entire spaces to HTML. To export a space, go 
 ### Exporting Google Docs to HTML
 
 With the Google Doc open, select File -> Download -> Web Page. This will download the HTML as a zip archive. Unzip the archive which will contain the HTML file and other resources like images.
+
+## Contributing
+
+### Build from Source
+
+The binary can be built from source and requires `go >= 1.17` to be installed on your system. (The `build` step assumes you have appropriate values for `GOOS` and `GOARCH` set for your system).
+
+Build the binary with
+
+```sh
+make install
+make build
+```
+
+This creates an executable in `./bin/htmltomd`.
