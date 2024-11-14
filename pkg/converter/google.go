@@ -23,8 +23,11 @@ func NewGoogleSelectionConverter(conf SelectionConverterConfig) *GoogleSelection
 
 	if conf.Transformer != nil {
 		c.Transformer = conf.Transformer
+		if c.Transformer.textCleaner == nil {
+			c.Transformer.textCleaner = NewTextCleaner(nil)
+		}
 	} else {
-		c.Transformer = &Transformer{}
+		c.Transformer = NewTransformer(nil)
 	}
 
 	if conf.RootElementFinder != nil {
@@ -79,7 +82,7 @@ func (c *GoogleSelectionConverter) defaultRootElementFinder(doc *goquery.Documen
 }
 
 func (c *GoogleSelectionConverter) defaultTitleFinder(doc *goquery.Document) string {
-	return CleanText(doc.Find("head").First().ChildrenFiltered("title").First().Text())
+	return c.Transformer.CleanText(doc.Find("head").First().ChildrenFiltered("title").First().Text())
 }
 
 func (c *GoogleSelectionConverter) defaultContentSelector(s *goquery.Selection) *goquery.Selection {
@@ -93,14 +96,14 @@ func (c *GoogleSelectionConverter) defaultContentSelectorHandler(i int, elm *goq
 	tag := elm.Nodes[0].Data
 	switch tag {
 	case "p", "span":
-		mdDoc.AddParagraph(CleanText(elm.Text()))
+		mdDoc.AddParagraph(c.Transformer.CleanText(elm.Text()))
 	case "hr":
 		// Ignore the page breaks that indicate a new page in the google doc
 		if !c.isPageBreak(elm) {
 			mdDoc.AddHorizontalRule()
 		}
 	case "h1", "h2", "h3", "h4", "h5", "h6":
-		mdDoc.AddHeader(tag, CleanText(elm.Text()))
+		mdDoc.AddHeader(tag, c.Transformer.CleanText(elm.Text()))
 	case "ul", "ol":
 		mdDoc.AddContent(c.Transformer.ToList(elm))
 	case "table":

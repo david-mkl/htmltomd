@@ -21,8 +21,11 @@ func NewHTMLSelectionConverter(conf SelectionConverterConfig) *HTMLSelectionConv
 
 	if conf.Transformer != nil {
 		c.Transformer = conf.Transformer
+		if c.Transformer.textCleaner == nil {
+			c.Transformer.textCleaner = NewTextCleaner(nil)
+		}
 	} else {
-		c.Transformer = &Transformer{}
+		c.Transformer = NewTransformer(nil)
 	}
 
 	if conf.RootElementFinder != nil {
@@ -77,7 +80,7 @@ func (c *HTMLSelectionConverter) defaultRootElementFinder(doc *goquery.Document)
 }
 
 func (c *HTMLSelectionConverter) defaultTitleFinder(doc *goquery.Document) string {
-	return CleanText(doc.Find("head").First().ChildrenFiltered("title").First().Text())
+	return c.Transformer.CleanText(doc.Find("head").First().ChildrenFiltered("title").First().Text())
 }
 
 func (c *HTMLSelectionConverter) defaultContentSelector(s *goquery.Selection) *goquery.Selection {
@@ -91,11 +94,11 @@ func (c *HTMLSelectionConverter) defaultContentSelectorHandler(i int, elm *goque
 	tag := elm.Nodes[0].Data
 	switch tag {
 	case "p", "span":
-		mdDoc.AddParagraph(CleanText(elm.Text()))
+		mdDoc.AddParagraph(c.Transformer.CleanText(elm.Text()))
 	case "hr":
 		mdDoc.AddHorizontalRule()
 	case "h1", "h2", "h3", "h4", "h5", "h6":
-		mdDoc.AddHeader(tag, CleanText(elm.Text()))
+		mdDoc.AddHeader(tag, c.Transformer.CleanText(elm.Text()))
 	case "ul", "ol":
 		mdDoc.AddContent(c.Transformer.ToList(elm))
 	case "table":

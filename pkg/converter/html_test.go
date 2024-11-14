@@ -42,7 +42,7 @@ func TestDefaultHTMLConverter(t *testing.T) {
 `)
 
 	s := NewHTMLSelectionConverter(SelectionConverterConfig{})
-	c := DocumentConverter{SelectionConv: s}
+	c := NewDocumentConverter(s, nil)
 
 	result := c.DocumentToMarkdown(doc).String()
 	expected := `# Test Doc

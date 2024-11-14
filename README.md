@@ -95,6 +95,23 @@ to
 | Data 2,1 | Data 2,2 |
 ```
 
+### Unicode
+
+Troublesome characters like invisible spaces are removed while other characters like left/right quotes are converted to regular ascii quotes.
+
+The following conversions/replacements are made:
+
+| Unicode | Replacement  | Notes |
+| --- | ---  | --- |
+| `\u00a0` | ` ` | Replaces invisible space with blank space |
+| `\u00b6` | ` ` | Replaces pilcrow paragraph sign with blank space |
+| `\u201c` | `"` | Left double quotation mark replaced with ascii quote |
+| `\u201d` | `"` | Right double quotation mark replaced with ascii quote |
+| `\u2018` | `'` | Left single quotation mark replaced with ascii quote |
+| `\u2019` | `'` | Right single quotation mark replaced with ascii quote |
+
+To convert to ascii only text (all non-ascii characters will be removed) use the `--ascii-only` flag when converting.
+
 ### Convert Command
 
 Converts `.html` files to `.md` files.
@@ -229,7 +246,7 @@ With the Google Doc open, select File -> Download -> Web Page. This will downloa
 
 ### Build from Source
 
-The binary can be built from source and requires `go >= 1.17` to be installed on your system. (The `build` step assumes you have appropriate values for `GOOS` and `GOARCH` set for your system).
+The binary can be built from source and requires `go >= 1.23` to be installed on your system. (The `build` step assumes you have appropriate values for `GOOS` and `GOARCH` set for your system).
 
 Build the binary with
 

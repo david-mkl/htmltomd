@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -11,22 +13,15 @@ builds:
     ldflags:
       - -X github.com/david-mk-lawrence/htmltomd/internal/version.version={{.Version}}
 brews:
-  - tap:
+  - repository:
       owner: david-mk-lawrence
       name: homebrew-htmltomd
     description: "Convert HTML files to markdown"
     homepage: "https://github.com/david-mk-lawrence/htmltomd"
-archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:

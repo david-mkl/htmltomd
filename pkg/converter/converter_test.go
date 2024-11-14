@@ -8,6 +8,7 @@ import (
 )
 
 type TestSelectionConverter struct {
+	Transformer *Transformer
 }
 
 func (c *TestSelectionConverter) FindRootElement(doc *goquery.Document) *goquery.Selection {
@@ -15,7 +16,7 @@ func (c *TestSelectionConverter) FindRootElement(doc *goquery.Document) *goquery
 }
 
 func (c *TestSelectionConverter) FindTitle(doc *goquery.Document) string {
-	return CleanText(doc.Find("h1").Text())
+	return c.Transformer.CleanText(doc.Find("h1").Text())
 }
 
 func (c *TestSelectionConverter) FindContentElements(s *goquery.Selection) *goquery.Selection {
@@ -23,28 +24,73 @@ func (c *TestSelectionConverter) FindContentElements(s *goquery.Selection) *goqu
 }
 
 func (c *TestSelectionConverter) HandleMatchedSelection(i int, s *goquery.Selection, md *markdown.Doc, toMD SelectionToMD) {
-	md.AddParagraph(CleanText(s.Text()))
+	md.AddParagraph(c.Transformer.CleanText(s.Text()))
 }
 
 func TestDocumentToMarkdown(t *testing.T) {
 	doc := newTestDoc(`
 <html>
 	<body>
-		<h1>Test Title</h1>
+		<h1>Těst Title</h1>
 		<div>
 			<p>Test Paragraph 1</p>
-			<p>Test Paragraph 2</p>
+			<p>Test Pâragraph 2</p>
 		</div>
 	</body>
 </html>
 `)
 
-	s := TestSelectionConverter{}
-	c := DocumentConverter{SelectionConv: &s}
+	tc := NewTextCleaner(&TextCleanerConf{
+		AsciiOnly: true,
+	})
+	s := &TestSelectionConverter{
+		Transformer: NewTransformer(&TransformerConf{
+			TextCleaner: tc,
+		}),
+	}
+	d := &DocumentConverterConf{
+		TextCleaner: tc,
+	}
+	c := NewDocumentConverter(s, d)
 	mdDoc := c.DocumentToMarkdown(doc)
 
 	result := mdDoc.String()
-	expected := "# Test Title\n\nTest Paragraph 1\n\nTest Paragraph 2"
+	expected := "# Tst Title\n\nTest Paragraph 1\n\nTest Pragraph 2"
+
+	if result != expected {
+		t.Errorf("Expected\n%s\nGot\n%s", expected, result)
+	}
+}
+
+func TestDocumentToMarkdownWithUnicode(t *testing.T) {
+	doc := newTestDoc(`
+<html>
+	<body>
+		<h1>Tèsț Tïtlē</h1>
+		<div>
+			<p>Tëst Paragrãph 1</p>
+			<p>Těst Parägřaph 2</p>
+		</div>
+	</body>
+</html>
+`)
+
+	tc := NewTextCleaner(&TextCleanerConf{
+		AsciiOnly: false,
+	})
+	s := &TestSelectionConverter{
+		Transformer: NewTransformer(&TransformerConf{
+			TextCleaner: tc,
+		}),
+	}
+	d := &DocumentConverterConf{
+		TextCleaner: tc,
+	}
+	c := NewDocumentConverter(s, d)
+	mdDoc := c.DocumentToMarkdown(doc)
+
+	result := mdDoc.String()
+	expected := "# Tèsț Tïtlē\n\nTëst Paragrãph 1\n\nTěst Parägřaph 2"
 
 	if result != expected {
 		t.Errorf("Expected\n%s\nGot\n%s", expected, result)

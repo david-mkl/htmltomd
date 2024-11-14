@@ -36,8 +36,11 @@ func NewConfluenceSelectionConverter(conf SelectionConverterConfig) *ConfluenceS
 
 	if conf.Transformer != nil {
 		c.Transformer = conf.Transformer
+		if c.Transformer.textCleaner == nil {
+			c.Transformer.textCleaner = NewTextCleaner(nil)
+		}
 	} else {
-		c.Transformer = &Transformer{}
+		c.Transformer = NewTransformer(nil)
 	}
 
 	if conf.RootElementFinder != nil {
@@ -92,7 +95,7 @@ func (c *ConfluenceSelectionConverter) defaultRootElementFinder(doc *goquery.Doc
 }
 
 func (c *ConfluenceSelectionConverter) defaultTitleFinder(doc *goquery.Document) string {
-	return CleanText(doc.Find("#title-text").First().Text())
+	return c.Transformer.CleanText(doc.Find("#title-text").First().Text())
 }
 
 func (c *ConfluenceSelectionConverter) defaultContentSelector(s *goquery.Selection) *goquery.Selection {
@@ -106,11 +109,11 @@ func (c *ConfluenceSelectionConverter) defaultContentSelectorHandler(i int, elm 
 	tag := elm.Nodes[0].Data
 	switch tag {
 	case "p", "span":
-		mdDoc.AddParagraph(CleanText(elm.Text()))
+		mdDoc.AddParagraph(c.Transformer.CleanText(elm.Text()))
 	case "hr":
 		mdDoc.AddHorizontalRule()
 	case "h1", "h2", "h3", "h4", "h5", "h6":
-		mdDoc.AddHeader(tag, CleanText(elm.Text()))
+		mdDoc.AddHeader(tag, c.Transformer.CleanText(elm.Text()))
 	case "ul", "ol":
 		mdDoc.AddContent(c.Transformer.ToList(elm))
 	case "table":
@@ -133,7 +136,7 @@ func (c *ConfluenceSelectionConverter) toPanel(elm *goquery.Selection, docConf m
 	doc := toMD(elm.Find("."+confluencePanelContentClass).First(), docConf)
 
 	// Only markdown for hugo will be converted to panels
-	if c.Transformer.Format != "hugo" {
+	if c.Transformer.format != "hugo" {
 		return doc
 	}
 

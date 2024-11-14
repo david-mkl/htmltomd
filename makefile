@@ -21,4 +21,5 @@ install:
 	go install $(MAIN)
 
 test:
-	go test -cover -run . ./...
+	go test -coverprofile=.covereage.out -cover -run . ./...
+	go tool cover -html=.covereage.out -o coverage.html

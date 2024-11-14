@@ -12,12 +12,46 @@ import (
 
 var asciiFilter = regexp.MustCompile("[[:^ascii:]]")
 
+const defaultAsciiOnly = false
+
 // SelectionCallback is a function that handles a goquery.Selection
 type SelectionCallback = func(i int, s *goquery.Selection)
 
 // Transformer converts HTML DOM elements into markdown elements
 type Transformer struct {
-	Format string
+	format      string
+	textCleaner *TextCleaner
+}
+
+// TransformerConf is the configuration for a Transformer.
+type TransformerConf struct {
+	Format      *string
+	TextCleaner *TextCleaner
+}
+
+// NewTransformer initializes a Transformer with the given format and TextCleaner.
+func NewTransformer(conf *TransformerConf) *Transformer {
+	var cleaner *TextCleaner
+	if conf != nil && conf.TextCleaner != nil {
+		cleaner = conf.TextCleaner
+	} else {
+		cleaner = NewTextCleaner(nil)
+	}
+	var format string
+	if conf != nil && conf.Format != nil {
+		format = *conf.Format
+	}
+
+	return &Transformer{format: format, textCleaner: cleaner}
+}
+
+// CleanText is a wrapper for its TextCleaner method.
+// Will call default if no TextCleaner is configured on the transformer.
+func (t *Transformer) CleanText(content string) string {
+	if t.textCleaner == nil {
+		return NewTextCleaner(nil).CleanText(content)
+	}
+	return t.textCleaner.CleanText(content)
 }
 
 // RemoveScripts removes any script, style, or link tags from the DOM element.
@@ -45,7 +79,7 @@ func (t *Transformer) ToList(list *goquery.Selection) markdown.List {
 	var items []string
 	tag := list.Nodes[0].Data
 	list.ChildrenFiltered("li").Each(func(i int, li *goquery.Selection) {
-		items = append(items, CleanText(li.Text()))
+		items = append(items, t.textCleaner.CleanText(li.Text()))
 	})
 
 	if tag == "ol" {
@@ -61,7 +95,7 @@ func (t *Transformer) ToTable(table *goquery.Selection) markdown.Table {
 
 	headers := make([]string, len(headerElms.Nodes))
 	headerElms.Each(func(i int, th *goquery.Selection) {
-		headers[i] = CleanText(th.Text())
+		headers[i] = t.textCleaner.CleanText(th.Text())
 	})
 
 	var rows [][]string
@@ -70,7 +104,7 @@ func (t *Transformer) ToTable(table *goquery.Selection) markdown.Table {
 		cellElms := tr.Find("td")
 		cells := make([]string, len(cellElms.Nodes))
 		cellElms.Each(func(j int, td *goquery.Selection) {
-			cells[j] = CleanText(td.Text())
+			cells[j] = t.textCleaner.CleanText(td.Text())
 		})
 		if len(cells) > 0 {
 			rows = append(rows, cells)
@@ -130,7 +164,7 @@ func (t *Transformer) ReplaceAnchors(elm *goquery.Selection) {
 // ReplaceAnchor replaces the DOM element in place with a markdown link.
 func (t *Transformer) ReplaceAnchor(i int, s *goquery.Selection) {
 	if href, exists := s.Attr("href"); exists {
-		text := CleanText(s.Text())
+		text := t.textCleaner.CleanText(s.Text())
 		s.ReplaceWithHtml(fmt.Sprintf("[%s](%s)", text, href))
 	}
 }
@@ -145,7 +179,7 @@ func (t *Transformer) ReplaceImages(elm *goquery.Selection) {
 func (t *Transformer) ReplaceImage(i int, s *goquery.Selection) {
 	if src, exists := s.Attr("src"); exists {
 		alt, _ := s.Attr("alt")
-		if t.Format == "hugo" {
+		if t.format == "hugo" {
 			s.ReplaceWithHtml(fmt.Sprintf("{{< figure src=\"./%s\" alt=\"%s\" >}}", src, alt))
 		} else {
 			s.ReplaceWithHtml(fmt.Sprintf("![%s](%s)", alt, src))
@@ -161,7 +195,7 @@ func (t *Transformer) ReplaceInlineCodes(elm *goquery.Selection) {
 // ReplaceInlineCode replaces the DOM element in place with text content wrapped in "`".
 func (t *Transformer) ReplaceInlineCode(i int, s *goquery.Selection) {
 	html, _ := s.Html()
-	s.ReplaceWithHtml(fmt.Sprintf("`%s`", CleanText(html)))
+	s.ReplaceWithHtml(fmt.Sprintf("`%s`", t.textCleaner.CleanText(html)))
 }
 
 // ReplaceItalics finds all child "em" tags and replaces them in place with markdown italics.
@@ -171,7 +205,7 @@ func (t *Transformer) ReplaceItalics(elm *goquery.Selection) {
 
 // ReplaceItalic replaces the DOM element in place with the text content wrapped in "_".
 func (t *Transformer) ReplaceItalic(i int, s *goquery.Selection) {
-	s.ReplaceWithHtml(fmt.Sprintf("_%s_", CleanText(s.Text())))
+	s.ReplaceWithHtml(fmt.Sprintf("_%s_", t.textCleaner.CleanText(s.Text())))
 }
 
 // ReplaceBolds finds all child "strong" tags and replaces them in place with markdown bold.
@@ -181,24 +215,48 @@ func (t *Transformer) ReplaceBolds(elm *goquery.Selection) {
 
 // ReplaceBold replaces the DOM element in place with the text content wrapped in "**".
 func (t *Transformer) ReplaceBold(i int, s *goquery.Selection) {
-	s.ReplaceWithHtml(fmt.Sprintf("**%s**", CleanText(s.Text())))
+	s.ReplaceWithHtml(fmt.Sprintf("**%s**", t.textCleaner.CleanText(s.Text())))
 }
 
-// CleanText removes newlines, replaces common unicode characters with
-// ascii, removes any other non-common ascii values, and trims any whitespace.
-func CleanText(content string) string {
+// TextCleaner cleans text content.
+// For example, it trims, removes newlines, and can replace unicode characters with ascii
+type TextCleaner struct {
+	asciiOnly bool
+}
+
+// TextCleanerConf is the configuration for a TextCleaner.
+type TextCleanerConf struct {
+	AsciiOnly bool
+}
+
+// NewTextCleaner initializes a TextCleaner with the given options.
+// If no options are given, then it will default to only allowing ascii characters.
+func NewTextCleaner(conf *TextCleanerConf) *TextCleaner {
+	asciiOnly := defaultAsciiOnly
+	if conf != nil {
+		asciiOnly = conf.AsciiOnly
+	}
+
+	return &TextCleaner{asciiOnly: asciiOnly}
+}
+
+// CleanText removes newlines, trims whitespace, and optionally replaces common unicode characters with ascii.
+func (tc *TextCleaner) CleanText(content string) string {
 	lines := strings.Split(content, "\n")
 	trimmed := make([]string, len(lines))
 	for idx, line := range lines {
 		// Replace invisible spaces
 		line = strings.ReplaceAll(line, "\u00a0", " ")
+		line = strings.ReplaceAll(line, "\u00b6", "")
 		// Replace quotes
 		line = strings.ReplaceAll(line, "\u201c", "\"")
 		line = strings.ReplaceAll(line, "\u201d", "\"")
 		line = strings.ReplaceAll(line, "\u2018", "'")
 		line = strings.ReplaceAll(line, "\u2019", "'")
-		// Remove any other non-ascii unicode character
-		line = asciiFilter.ReplaceAllLiteralString(line, "")
+		if tc.asciiOnly {
+			// Remove any other non-ascii unicode character
+			line = asciiFilter.ReplaceAllLiteralString(line, "")
+		}
 		// Trim any remaining whitespace
 		line = strings.Trim(line, " ")
 

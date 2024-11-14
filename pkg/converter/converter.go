@@ -30,6 +30,12 @@ type HandleSelection func(int, *goquery.Selection, *markdown.Doc, SelectionToMD)
 // DocumentConverter is a struct that can convert an HTML document into a markdown document
 type DocumentConverter struct {
 	SelectionConv SelectionConverter
+	TextCleaner   *TextCleaner
+}
+
+// DocumentConverterConf is the configuration for a DocumentConverter
+type DocumentConverterConf struct {
+	TextCleaner *TextCleaner
 }
 
 // SelectionConverter is an interface that converts a style of HTML document to markdown.
@@ -50,10 +56,22 @@ type SelectionConverterConfig struct {
 	ContentSelectorHandler HandleSelection
 }
 
+// NewDocumentConverter creates a new DocumentConverter with the given SelectionConverter and configuration
+func NewDocumentConverter(selectionConv SelectionConverter, conf *DocumentConverterConf) *DocumentConverter {
+	var textCleaner *TextCleaner
+	if conf != nil && conf.TextCleaner != nil {
+		textCleaner = conf.TextCleaner
+	} else {
+		textCleaner = NewTextCleaner(nil)
+	}
+
+	return &DocumentConverter{SelectionConv: selectionConv, TextCleaner: textCleaner}
+}
+
 // DocumentToMarkdown converts the HTML doc to markdown
 func (c *DocumentConverter) DocumentToMarkdown(doc *goquery.Document) *markdown.Doc {
 	root := c.SelectionConv.FindRootElement(doc)
-	title := CleanText(c.SelectionConv.FindTitle(doc))
+	title := c.TextCleaner.CleanText(c.SelectionConv.FindTitle(doc))
 	mdDoc := c.SelectionToMarkdown(root, markdown.DocConfig{Title: &title})
 
 	return mdDoc

@@ -19,6 +19,7 @@ type convertCmd struct {
 	outputDir    string
 	outputFormat string
 	inputFormat  string
+	asciiOnly    bool
 }
 
 func init() {
@@ -38,6 +39,7 @@ there. Otherwise, a directory will be created called "html_to_md_converted".`,
 	cmd.PersistentFlags().StringVar(&c.inputFormat, "input-format", "html", "source of html file. Can be 'html', 'confluence', or 'google'.")
 	cmd.PersistentFlags().StringVar(&c.outputFormat, "output-format", "md", "style of markdown output. Can be 'hugo' or 'md'.")
 	cmd.PersistentFlags().StringVarP(&c.outputDir, "out", "o", "./html_to_md_converted", "output directory")
+	cmd.PersistentFlags().BoolVar(&c.asciiOnly, "ascii-only", false, "removes all non-ascii characters")
 
 	rootCmd.AddCommand(cmd)
 }
@@ -64,7 +66,11 @@ func (c *convertCmd) convert(cmd *cobra.Command, args []string) (err error) {
 	wgDoneChan := make(chan bool)
 	errChan := make(chan error)
 
-	conf := converter.SelectionConverterConfig{Transformer: &converter.Transformer{Format: c.outputFormat}}
+	textCleaner := converter.NewTextCleaner(&converter.TextCleanerConf{AsciiOnly: c.asciiOnly})
+	transformer := converter.NewTransformer(&converter.TransformerConf{Format: &c.outputFormat, TextCleaner: textCleaner})
+	conf := converter.SelectionConverterConfig{
+		Transformer: transformer,
+	}
 	var selConv converter.SelectionConverter
 	if c.inputFormat == "confluence" {
 		selConv = converter.NewConfluenceSelectionConverter(conf)
@@ -73,7 +79,9 @@ func (c *convertCmd) convert(cmd *cobra.Command, args []string) (err error) {
 	} else {
 		selConv = converter.NewHTMLSelectionConverter(conf)
 	}
-	conv := converter.DocumentConverter{SelectionConv: selConv}
+	conv := converter.NewDocumentConverter(selConv, &converter.DocumentConverterConf{
+		TextCleaner: textCleaner,
+	})
 
 	for _, htmlFile := range htmlFiles {
 		wg.Add(1)
@@ -122,7 +130,7 @@ func (c *convertCmd) getOutputFile(htmlFile string) string {
 	return filepath.Join(c.outputDir, strings.TrimSuffix(filepath.Base(htmlFile), filepath.Ext(htmlFile))+".md")
 }
 
-func (c *convertCmd) convertFile(conv converter.DocumentConverter, htmlPath string, wg *sync.WaitGroup, errs chan<- error) {
+func (c *convertCmd) convertFile(conv *converter.DocumentConverter, htmlPath string, wg *sync.WaitGroup, errs chan<- error) {
 	defer wg.Done()
 
 	outFile := c.getOutputFile(htmlPath)

@@ -89,7 +89,7 @@ print(math.pi)</pre>
 `)
 
 	s := NewConfluenceSelectionConverter(SelectionConverterConfig{})
-	c := DocumentConverter{SelectionConv: s}
+	c := NewDocumentConverter(s, nil)
 
 	result := c.DocumentToMarkdown(doc).String()
 	expected := `# Test Doc

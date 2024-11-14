@@ -22,7 +22,7 @@ func deepClean(str string) string {
 }
 
 func TestRemoveScripts(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<head>
@@ -70,7 +70,7 @@ func TestRemoveScripts(t *testing.T) {
 }
 
 func TestTransform(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -97,7 +97,7 @@ func TestTransform(t *testing.T) {
 }
 
 func TestToUnorderedList(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -117,7 +117,7 @@ func TestToUnorderedList(t *testing.T) {
 }
 
 func TestToOrderedList(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -138,7 +138,7 @@ func TestToOrderedList(t *testing.T) {
 }
 
 func TestToTableWithoutHeadAndBody(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -165,7 +165,7 @@ func TestToTableWithoutHeadAndBody(t *testing.T) {
 }
 
 func TestToTableWithoutHeaders(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -192,7 +192,7 @@ func TestToTableWithoutHeaders(t *testing.T) {
 }
 
 func TestToTableWithHeadAndBody(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -222,7 +222,7 @@ func TestToTableWithHeadAndBody(t *testing.T) {
 	}
 }
 func TestToTableWithHeadWithoutRow(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -249,7 +249,7 @@ func TestToTableWithHeadWithoutRow(t *testing.T) {
 }
 
 func TestToTableWithTdAsHeadersInThead(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -276,7 +276,7 @@ func TestToTableWithTdAsHeadersInThead(t *testing.T) {
 }
 
 func TestToTableWithMultipleHeaderRows(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -310,7 +310,7 @@ func TestToTableWithMultipleHeaderRows(t *testing.T) {
 }
 
 func TestReplaceAll(t *testing.T) {
-	tr := Transformer{}
+	tr := NewTransformer(nil)
 	doc := newTestDoc(`
 <html>
 	<body>
@@ -333,11 +333,43 @@ func TestReplaceAll(t *testing.T) {
 	}
 }
 
-func TestCleanText(t *testing.T) {
+func TestDefaultTextCleaner(t *testing.T) {
+	tc := NewTextCleaner(nil)
+
 	dirty := "  \u00b6\u2018Hello\u2019\u00a0\u201cWorld\u201d! "
 
-	result := CleanText(dirty)
+	result := tc.CleanText(dirty)
 	expected := "'Hello' \"World\"!"
+
+	if result != expected {
+		t.Errorf("Expected %s. Got %s", expected, result)
+	}
+}
+
+func TestAsciiOnlyTextCleaner(t *testing.T) {
+	tc := NewTextCleaner(&TextCleanerConf{
+		AsciiOnly: true,
+	})
+
+	dirty := "  \u00b6\u2018Hello\u2019\u00a0\u201cWorld\u201d! "
+
+	result := tc.CleanText(dirty)
+	expected := "'Hello' \"World\"!"
+
+	if result != expected {
+		t.Errorf("Expected %s. Got %s", expected, result)
+	}
+}
+
+func TestUnicodeTextCleaner(t *testing.T) {
+	tc := NewTextCleaner(&TextCleanerConf{
+		AsciiOnly: false,
+	})
+
+	dirty := "  \u00b6\u2018Ħëlľō\u2019\u00a0\u201cŴórłď\u201d! "
+
+	result := tc.CleanText(dirty)
+	expected := "'Ħëlľō' \"Ŵórłď\"!"
 
 	if result != expected {
 		t.Errorf("Expected %s. Got %s", expected, result)
